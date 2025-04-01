@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <title>Bate-papo Node.js e Socket.IO</title>
+    <link rel="stylesheet" href="/public/style.css">
+  </head>
+  <body>
+    <h1>Whatsapp FAKE</h1>
+    <ul id="mensagens"></ul>
+    <form>
+      <input id="nome" placeholder="Seu nome de usuário" autocomplete="off" /><br>
+      <input id="mensagem" placeholder="Sua mensagem" autocomplete="off" />
+      <button>Enviar</button>
+    </form>
+
+    <!-- Importa o script do Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const nomeInput = document.getElementById('nome');
+      const mensagemInput = document.getElementById('mensagem');
+      const mensagens = document.getElementById('mensagens');
+
+      document.querySelector('form').addEventListener('submit', event => {
+        event.preventDefault();
+        const nome = nomeInput.value.trim();
+        const mensagem = mensagemInput.value.trim();
+        
+        if (nome && mensagem) {
+          socket.emit('chat message', { nome, mensagem });
+          mensagemInput.value = '';
+          nomeInput.disabled = true; 
+        }
+      });
+
+      socket.on('chat message', dados => {
+        const lista = document.createElement('li');
+        lista.textContent = `${dados.nome}: ${dados.mensagem}`;
+
+        // Verifica se a mensagem foi enviada pelo próprio usuário
+        if (dados.nome === nomeInput.value.trim()) {
+          lista.classList.add("minha-mensagem");
+        } else {
+          lista.classList.add("outra-mensagem");
+        }
+
+        mensagens.appendChild(lista);
+        mensagens.scrollTop = mensagens.scrollHeight;
+      });
+    </script>
+  </body>
+</html>
